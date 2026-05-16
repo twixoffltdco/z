@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>z.ai - Чат с ИИ 🇷🇺</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .flag {
+            font-size: 1.5em;
+            margin-left: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            height: calc(100vh - 200px);
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .mode-btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .mode-btn:hover, .mode-btn.active {
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            transform: translateX(5px);
+        }
+
+        .chat-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            height: 100%;
+        }
+
+        .message {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            margin-left: auto;
+            color: #1a1a2e;
+        }
+
+        .ai-message {
+            background: rgba(255, 255, 255, 0.1);
+            margin-right: auto;
+        }
+
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        #userInput::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #sendBtn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        #sendBtn:hover {
+            transform: scale(1.05);
+        }
+
+        .media-preview {
+            margin: 10px 0;
+            border-radius: 10px;
+            max-width: 100%;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">z.ai <span class="flag">🇷🇺</span></div>
+            <p>Российский ИИ нового поколения | Текст • Картинки • Видео • Музыка</p>
+        </header>
+
+        <div class="main-content">
+            <aside class="sidebar">
+                <h3>Режимы работы 🇷🇺</h3>
+                <button class="mode-btn active" data-mode="text">💬 Текстовый чат</button>
+                <button class="mode-btn" data-mode="image">🎨 Генерация изображений</button>
+                <button class="mode-btn" data-mode="video">🎬 Генерация видео</button>
+                <button class="mode-btn" data-mode="music">🎵 Создание музыки</button>
+                <button class="mode-btn" data-mode="prompt">✍️ Написание промтов</button>
+                
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">🚀</div>
+                        <div>Бесплатно</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔓</div>
+                        <div>Open Source</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🇷🇺</div>
+                        <div>Российский</div>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message ai-message">
+                        Привет! Я z.ai - российский искусственный интеллект 🇷🇺<br><br>
+                        Я умею:<br>
+                        • Вести диалог на любые темы<br>
+                        • Генерировать изображения по описанию<br>
+                        • Создавать видео и музыку<br>
+                        • Писать качественные промты для других ИИ<br><br>
+                        Выберите режим слева или просто напишите мне!
+                    </div>
+                </div>
+                
+                <div class="input-area">
+                    <div class="input-group">
+                        <input type="file" id="fileInput" accept="image/*,video/*,audio/*" style="display: none;">
+                        <input type="text" id="userInput" placeholder="Напишите сообщение или опишите, что создать..." autocomplete="off">
+                        <button id="sendBtn">Отправить 🚀</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        class ZAIChat {
+            constructor() {
+                this.currentMode = 'text';
+                this.messages = [];
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.loadSettings();
+            }
+
+            bindEvents() {
+                document.getElementById('sendBtn').addEventListener('click', () => this.sendMessage());
+                document.getElementById('userInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendMessage();
+                });
+
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentMode = e.target.dataset.mode;
+                        this.updatePlaceholder();
+                    });
+                });
+            }
+
+            updatePlaceholder() {
+                const placeholders = {
+                    text: 'Напишите сообщение...',
+                    image: 'Опишите изображение, которое хотите создать...',
+                    video: 'Опишите видео, которое хотите создать...',
+                    music: 'Опишите музыку, которую хотите создать...',
+                    prompt: 'Опишите задачу для создания промта...'
+                };
+                document.getElementById('userInput').placeholder = placeholders[this.currentMode] + ' 🇷🇺';
+            }
+
+            async sendMessage() {
+                const input = document.getElementById('userInput');
+                const message = input.value.trim();
+                
+                if (!message) return;
+
+                this.addMessage(message, 'user');
+                input.value = '';
+
+                // Show loading
+                const loadingId = this.addLoadingMessage();
+
+                try {
+                    const response = await this.generateResponse(message);
+                    this.removeMessage(loadingId);
+                    this.addMessage(response, 'ai');
+                } catch (error) {
+                    this.removeMessage(loadingId);
+                    this.addMessage('Произошла ошибка при обработке запроса. Попробуйте снова. 🇷🇺', 'ai');
+                }
+            }
+
+            addMessage(content, type) {
+                const messagesContainer = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}-message`;
+                messageDiv.innerHTML = content;
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                this.messages.push({ type, content });
+                return messageDiv.id;
+            }
+
+            addLoadingMessage() {
+                const id = 'loading-' + Date.now();
+                const messagesContainer = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message ai-message';
+                messageDiv.id = id;
+                messageDiv.innerHTML = '<div class="loading"></div> Обрабатываю запрос... 🇷🇺';
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                return id;
+            }
+
+            removeMessage(id) {
+                const element = document.getElementById(id);
+                if (element) element.remove();
+            }
+
+            async generateResponse(userMessage) {
+                // Симуляция ответа ИИ с использованием открытых моделей
+                // В реальном приложении здесь будет интеграция с локальными LLM
+                
+                await this.simulateDelay();
+
+                switch(this.currentMode) {
+                    case 'text':
+                        return this.generateTextResponse(userMessage);
+                    case 'image':
+                        return this.generateImageResponse(userMessage);
+                    case 'video':
+                        return this.generateVideoResponse(userMessage);
+                    case 'music':
+                        return this.generateMusicResponse(userMessage);
+                    case 'prompt':
+                        return this.generatePromptResponse(userMessage);
+                    default:
+                        return this.generateTextResponse(userMessage);
+                }
+            }
+
+            simulateDelay() {
+                return new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+            }
+
+            generateTextResponse(message) {
+                const responses = [
+                    `Интересный вопрос! 🇷🇺 Как российский ИИ, я могу сказать, что ${message.toLowerCase().includes('привет') ? 'приветствую вас!' : 'это требует глубокого анализа.'}`,
+                    `Спасибо за ваш вопрос! На основе моих знаний я могу предложить следующее решение...`,
+                    `Отличная тема для обсуждения! 🇷🇺 Давайте разберем это подробнее.`,
+                    `Я проанализировал ваш запрос и вот что могу сказать...`
+                ];
+                
+                // Простая логика ответов
+                if (message.toLowerCase().includes('привет') || message.toLowerCase().includes('здравствуй')) {
+                    return 'Здравствуйте! 🇷🇺 Рад вас видеть в z.ai! Чем могу помочь?';
+                }
+                
+                if (message.toLowerCase().includes('как дела')) {
+                    return 'У меня всё отлично! 🇷🇺 Готов помогать вам с любыми задачами. Что вас интересует?';
+                }
+
+                return responses[Math.floor(Math.random() * responses.length)] + 
+                       ` Вы спросили: "${message}". Это важная тема, и я готов обсудить её более детально.`;
+            }
+
+            generateImageResponse(description) {
+                return `🎨 Генерирую изображение по вашему описанию...<br><br>
+                        <strong>Описание:</strong> ${description}<br><br>
+                        <div style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4); height: 200px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            🖼️ Изображение создается...<br>
+                            (В полной версии здесь будет сгенерированное изображение)
+                        </div><br>
+                        🇷🇺 Изображение готово! Хотите что-то ещё?`;
+            }
+
+            generateVideoResponse(description) {
+                return `🎬 Создаю видео по вашему запросу...<br><br>
+                        <strong>Сценарий:</strong> ${description}<br><br>
+                        <div style="background: linear-gradient(45deg, #4ecdc4, #45b7d1); height: 150px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            🎥 Видео генерируется...<br>
+                            (В полной версии здесь будет сгенерированное видео)
+                        </div><br>
+                        🇷🇺 Видео готово к просмотру!`;
+            }
+
+            generateMusicResponse(description) {
+                return `🎵 Композирую музыку...<br><br>
+                        <strong>Стиль:</strong> ${description}<br><br>
+                        <div style="background: linear-gradient(45deg, #45b7d1, #ff6b6b); height: 100px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            🎵 Аудио дорожка создается...<br>
+                            (В полной версии здесь будет аудиоплеер)
+                        </div><br>
+                        🇷🇺 Музыкальный трек готов!`;
+            }
+
+            generatePromptResponse(task) {
+                return `✍️ Создаю оптимальный промт для вашей задачи...<br><br>
+                        <strong>Задача:</strong> ${task}<br><br>
+                        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin: 10px 0;">
+                            <strong>Оптимизированный промт:</strong><br>
+                            "Create a highly detailed, professional quality [OBJECT/SCENE] with [SPECIFIC DETAILS]. 
+                            Style: [ART STYLE], Lighting: [LIGHTING TYPE], Composition: [COMPOSITION], 
+                            Color palette: [COLORS], Mood: [MOOD], Quality: 8K, Ultra detailed"
+                        </div>
+                        🇷🇺 Промт готов к использованию в любых нейросетях!`;
+            }
+
+            loadSettings() {
+                // Загрузка настроек из localStorage если есть
+                const savedMode = localStorage.getItem('zai_mode');
+                if (savedMode) {
+                    this.currentMode = savedMode;
+                    document.querySelectorAll('.mode-btn').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.mode === savedMode);
+                    });
+                }
+            }
+
+            saveSettings() {
+                localStorage.setItem('zai_mode', this.currentMode);
+            }
+        }
+
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', () => {
+            window.zaiChat = new ZAIChat();
+            console.log('🇷🇺 z.ai запущен! Российский ИИ готов к работе.');
+        });
+    </script>
+</body>
+</html>
