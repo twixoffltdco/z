@@ -20,22 +20,62 @@ class ZAIApp {
             llama: {
                 name: 'Llama 3.2',
                 endpoint: 'http://localhost:11434/api/generate',
-                provider: 'Ollama (Local)'
+                provider: 'Ollama (Local)',
+                install: 'ollama run llama3.2'
             },
             mistral: {
                 name: 'Mistral 7B',
                 endpoint: 'http://localhost:11434/api/generate',
-                provider: 'Ollama (Local)'
+                provider: 'Ollama (Local)',
+                install: 'ollama run mistral'
             },
             qwen: {
-                name: 'Qwen 2.5',
+                name: 'Qwen 2.5 7B',
                 endpoint: 'http://localhost:11434/api/generate',
-                provider: 'Ollama (Local)'
+                provider: 'Ollama (Local)',
+                install: 'ollama run qwen2.5'
             },
             phi: {
-                name: 'Phi-3',
+                name: 'Phi-3 Mini',
                 endpoint: 'http://localhost:11434/api/generate',
-                provider: 'Ollama (Local)'
+                provider: 'Ollama (Local)',
+                install: 'ollama run phi3'
+            },
+            gemma: {
+                name: 'Gemma 2 9B',
+                endpoint: 'http://localhost:11434/api/generate',
+                provider: 'Ollama (Local)',
+                install: 'ollama run gemma2'
+            },
+            yi: {
+                name: 'Yi 34B',
+                endpoint: 'http://localhost:11434/api/generate',
+                provider: 'Ollama (Local)',
+                install: 'ollama run yi'
+            },
+            codellama: {
+                name: 'Code Llama 7B',
+                endpoint: 'http://localhost:11434/api/generate',
+                provider: 'Ollama (Local)',
+                install: 'ollama run codellama'
+            },
+            deepseek: {
+                name: 'DeepSeek Coder',
+                endpoint: 'http://localhost:11434/api/generate',
+                provider: 'Ollama (Local)',
+                install: 'ollama run deepseek-coder'
+            },
+            mixtral: {
+                name: 'Mixtral 8x7B',
+                endpoint: 'http://localhost:11434/api/generate',
+                provider: 'Ollama (Local)',
+                install: 'ollama run mixtral'
+            },
+            neural: {
+                name: 'Neural Chat 7B',
+                endpoint: 'http://localhost:11434/api/generate',
+                provider: 'Ollama (Local)',
+                install: 'ollama run neural-chat'
             }
         };
 
@@ -109,9 +149,7 @@ class ZAIApp {
 
         // Выбор модели
         document.getElementById('llmModel').addEventListener('change', (e) => {
-            this.settings.model = e.target.value;
-            this.saveSettings();
-            this.updateModelStatus();
+            this.changeModel(e.target.value);
         });
 
         // Закрытие модального окна по клику вне
@@ -520,6 +558,92 @@ solution();</code></pre>
         const selector = document.getElementById('llmModel');
         const statusClass = isAvailable ? 'online' : 'offline';
         selector.style.borderColor = isAvailable ? '#10b981' : '#ef4444';
+        
+        // Показываем баннер с туториалом если модель недоступна
+        if (!isAvailable) {
+            this.showTutorialBanner();
+        }
+    }
+
+    /**
+     * Показ баннера с туториалом по запуску ИИ
+     */
+    showTutorialBanner() {
+        // Проверяем, не показан ли уже баннер
+        if (document.querySelector('.tutorial-banner')) return;
+        
+        const banner = document.createElement('div');
+        banner.className = 'tutorial-banner';
+        banner.innerHTML = `
+            <div class="tutorial-banner-content">
+                <button class="tutorial-close-btn" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                <div class="tutorial-header">
+                    <span class="tutorial-icon">🤖</span>
+                    <h3>Как запустить ИИ локально</h3>
+                </div>
+                <div class="tutorial-steps">
+                    <div class="tutorial-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Установите Ollama</h4>
+                            <p>Скачайте и установите Ollama с официального сайта:</p>
+                            <a href="https://ollama.ai" target="_blank" class="tutorial-link">👉 ollama.ai</a>
+                        </div>
+                    </div>
+                    <div class="tutorial-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Запустите терминал</h4>
+                            <p>Откройте командную строку (Terminal на Mac/Linux или PowerShell/CMD на Windows)</p>
+                        </div>
+                    </div>
+                    <div class="tutorial-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Загрузите модель</h4>
+                            <p>Введите команду для загрузки выбранной модели:</p>
+                            <code id="modelInstallCommand">ollama run llama3.2</code>
+                            <button class="copy-command-btn" onclick="window.zaiApp.copyInstallCommand()">📋 Копировать</button>
+                        </div>
+                    </div>
+                    <div class="tutorial-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Готово!</h4>
+                            <p>После загрузки модели обновите страницу — ИИ будет работать локально!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-footer">
+                    <p>💡 Модель работает полностью локально на вашем компьютере без интернета</p>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(banner);
+        
+        // Обновляем команду установки для текущей модели
+        this.updateInstallCommand();
+    }
+
+    /**
+     * Обновление команды установки для текущей модели
+     */
+    updateInstallCommand() {
+        const commandEl = document.getElementById('modelInstallCommand');
+        if (commandEl && this.llmConfig[this.settings.model]) {
+            commandEl.textContent = this.llmConfig[this.settings.model].install;
+        }
+    }
+
+    /**
+     * Копирование команды установки
+     */
+    copyInstallCommand() {
+        const command = this.llmConfig[this.settings.model]?.install || 'ollama run llama3.2';
+        navigator.clipboard.writeText(command).then(() => {
+            this.showToast('✅', 'Команда скопирована в буфер обмена');
+        });
     }
 
     /**
@@ -572,6 +696,16 @@ solution();</code></pre>
      */
     toggleMobileMenu() {
         document.querySelector('.sidebar').classList.toggle('open');
+    }
+
+    /**
+     * Изменение выбранной модели с обновлением баннера
+     */
+    changeModel(model) {
+        this.settings.model = model;
+        this.saveSettings();
+        this.updateModelStatus();
+        this.updateInstallCommand();
     }
 
     /**
